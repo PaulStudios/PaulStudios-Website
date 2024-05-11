@@ -4,9 +4,9 @@ Jarvis AI Models
 
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Now
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .utilities import countries_exist
@@ -32,12 +32,15 @@ class UserProfile(models.Model):
     email = models.EmailField("Email", max_length=55, unique=True)
     password = models.CharField("Password", max_length=254)
     is_admin = models.BooleanField("Is ADMIN?", default=False)
+    activation_key = models.CharField(max_length=120, blank=True, null=True)
+    activated = models.BooleanField(default=False)
     register_ip = models.GenericIPAddressField("IP Address during creation", protocol="IPv4")
     created = models.DateTimeField(
         "Registration Date-Time",
         db_comment="Date and Time when the user was first registered",
         db_default=Now()
     )
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         name = self.full_name + " | (" + self.username + ")"

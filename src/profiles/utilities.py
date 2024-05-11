@@ -1,4 +1,7 @@
 import random
+import string
+
+from django.conf import settings
 
 countries = [
     'afghanistan', 'albania', 'algeria', 'american samoa', 'andorra', 'angola',
@@ -67,3 +70,10 @@ def countries_exist(val: str):
 def fake_country() -> str:
     """Returns a random country"""
     return random.choice(countries)
+
+
+SHORTCODE_MIN = getattr(settings, "SHORTCODE_MIN", 35)
+
+
+def code_generator(size=SHORTCODE_MIN, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
