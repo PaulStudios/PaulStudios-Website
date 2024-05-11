@@ -135,3 +135,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = "profiles.UserProfile"
+
+LOGIN_REDIRECT_URL = '/profiles/info'
+
+LOGIN_URL = '/profiles/login'
