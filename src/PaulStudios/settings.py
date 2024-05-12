@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 # Application definition
 
@@ -147,6 +147,8 @@ LOGIN_URL = '/profiles/login'
 STATICFILES_DIRS = [
     BASE_DIR / "profiles/static",
 ]
+
+STATIC_ROOT = "static_production"
 
 import sys
 if 'test' in sys.argv:
