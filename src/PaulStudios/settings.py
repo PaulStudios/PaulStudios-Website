@@ -84,10 +84,12 @@ WSGI_APPLICATION = 'PaulStudios.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 if 'test' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'only4test.sqlite'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'local_testing.sqlite'
         }
+    }
 else:
     DATABASES = {
         'default': {
