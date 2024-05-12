@@ -41,11 +41,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     register_ip = models.GenericIPAddressField("IP Address during creation", protocol="IPv4")
-    created = models.DateTimeField(
-        "Registration Date-Time",
-        db_comment="Date and Time when the user was first registered",
-        db_default=Now()
-    )
+    created = models.DateTimeField("Registration Date-Time", db_default=Now())
     updated = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = "username"

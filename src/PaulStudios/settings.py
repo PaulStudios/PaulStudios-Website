@@ -86,7 +86,11 @@ DATABASES = {
         'PASSWORD': env("DB_PASSWORD"),
         'HOST': env("DB_HOST"),
         'PORT': env("DB_PORT"),
-    }
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'only4test.sqlite'
+        },
 }
 
 # Password validation
@@ -143,3 +147,7 @@ LOGIN_URL = '/profiles/login'
 STATICFILES_DIRS = [
     BASE_DIR / "profiles/static",
 ]
+
+import sys
+if 'test' in sys.argv:
+    DATABASES['default'] = DATABASES['test']
