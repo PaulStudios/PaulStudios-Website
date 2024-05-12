@@ -20,11 +20,10 @@ from .utilities import countries_exist, code_generator
 def validate_country(name):
     if countries_exist(name):
         return name
-    else:
-        raise ValidationError(
-            _("%(value)s is not a real country."),
-            params={"value": name},
-        )
+    raise ValidationError(
+        _("%(value)s is not a real country."),
+        params={"value": name},
+    )
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -84,3 +83,4 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
                 html_message=html_message)
             sent_mail = False
             return sent_mail
+        return "FAILED"

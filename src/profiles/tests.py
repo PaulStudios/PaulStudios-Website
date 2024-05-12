@@ -1,8 +1,8 @@
 from django.test import TestCase
-
 from fake import FAKER
+
 from .models import UserProfile, validate_country
-from .utilities import fake_country, countries_exist
+from .utilities import fake_country
 
 
 class UserProfileModelTests(TestCase):
@@ -24,4 +24,3 @@ class UserProfileModelTests(TestCase):
 
     def test_countries_exist(self):
         self.assertEqual(validate_country(self.user.country), self.user.country)
-
