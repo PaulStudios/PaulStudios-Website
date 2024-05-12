@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .fake import FAKER
+from fake import FAKER
 from .models import UserProfile, validate_country
 from .utilities import fake_country, countries_exist
 
