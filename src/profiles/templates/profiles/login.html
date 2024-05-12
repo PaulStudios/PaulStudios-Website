@@ -1,31 +1,32 @@
 {% extends 'profiles/base.html' %}
-
+{% load static %}
 {% load crispy_forms_tags %}
-<head>
-  <title>Login</title>
-</head>
+{% block title %}
+PaulStudios | Login
+{% endblock title %}
 {% block content %}
   <div class="row">
     <div class="col-md-6 mx-auto">
-      <div class="card mt-5">
-      <div class="card-body text-center">
-        <img src="https://i.imgur.com/nC2m7Fi.jpeg"
+      <div class="card mt-5" style="background-color: rgba(0, 0, 0, 0);">
+        <div class="card-body text-center">
+            <img src="{% static 'profiles/logo.png' %}"
                              class="img-fluid mb-3"
                              alt="PaulStudios Logo"
                              style="max-width: 150px;">
-      <div class="shadow-lg p-3 mb-5 bg-body rounded ">
-<div class="mx-auto text-primary d-flex justify-content-center" style="width: 200px;">
-  <h1>Login</h1>
-</div>
-  <form method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="Log in to PaulStudios">Sign in</button>
-  </form>
-        <h6>
-  Need An Account? <a href='{%url 'register'%}'>Sign Up</a></h6>
-</div>
-    </div>
+            <div class="mx-auto d-flex justify-content-center" style="width: 200px;color: skyblue;">
+                <h1 class="fw-bold">Login</h1>
+            </div>
+            <div style="background-color: rgba(0, 0, 0, 0.5);">
+                <form method="post" >
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="Log in to PaulStudios">Sign in</button>
+                </form>
+                <h6 class="text-warning">
+                    Need An Account? <a href="{%url 'register'%}" class="card-link">Sign Up</a>
+                </h6>
+            </div>
+        </div>
       </div>
     </div>
   </div>

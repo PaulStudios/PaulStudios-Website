@@ -139,3 +139,7 @@ AUTH_USER_MODEL = "profiles.UserProfile"
 LOGIN_REDIRECT_URL = '/profiles/info'
 
 LOGIN_URL = '/profiles/login'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "profiles/static",
+]
