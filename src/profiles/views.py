@@ -3,11 +3,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
+
 from .models import UserProfile
 
 
 def index(request):
     return render(request,'profiles/index.html', {})
+
+
+def handler404(request, exception, template_name="profiles/404.html"):
+    response = render(template_name)
+    response.status_code = 404
+    return response
 
 @login_required
 def detail(request):
