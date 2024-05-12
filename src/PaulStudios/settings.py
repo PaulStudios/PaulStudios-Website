@@ -157,4 +157,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 import sys
 if 'test' in sys.argv:
+    SECRET_KEY = "56557s45NY&S$N5^$%n^$%s6n%bdty"
     DATABASES['default'] = DATABASES['test']
