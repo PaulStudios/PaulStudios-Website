@@ -144,11 +144,7 @@ LOGIN_REDIRECT_URL = '/profiles/info'
 
 LOGIN_URL = '/profiles/login'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "profiles/static",
-]
 
-STATIC_ROOT = "static_production"
 
 import sys
 if 'test' in sys.argv:
