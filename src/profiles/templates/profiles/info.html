@@ -2,12 +2,7 @@
 {% block content %}
 <h1 class="text-success">Info Page</h1>
 <div class="text-light">
-  {% if user.is_authenticated %}
     You are logged in as {{ user }}.
-    <a href="{% url 'logout' %}">Click here to log out.</a>
-  {% else %}
-    You are not logged in.
-    <a href="{% url 'login' %}">Click here to log in.</a>
-  {% endif %}
+    <a href="{% url 'profiles:logout' %}">Click here to log out.</a>
 </div>
 {% endblock %}

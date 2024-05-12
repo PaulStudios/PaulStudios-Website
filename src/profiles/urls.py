@@ -3,9 +3,10 @@ from django.urls import path
 
 from . import views
 
+app_name = "profiles"
 urlpatterns = [
     path("", views.index, name="index"),
-    path("info/", views.detail, name="profile_info"),
+    path("info/", views.detail, name="info"),
     path('activate/<str:code>/', views.activate_user_view, name='activate'),
     path('login/', LoginView.as_view(
         template_name='profiles/login.html',

@@ -1,0 +1,14 @@
+{% extends 'profiles/base.html' %}
+{% block content %}
+<h1 class="text-primary">Info Page</h1>
+<div class="text-light">
+  {% if user.is_authenticated %}
+    Hello {{ user }}. Welcome to PaulStudios
+    <a href="{% url 'profiles:logout' %}">Click here to log out.</a>
+  {% else %}
+    Hello Anonymous. Welcome to PaulStudios
+    You are not logged in.
+    <a href="{% url 'profiles:login' %}">Click here to log in.</a>
+  {% endif %}
+</div>
+{% endblock %}

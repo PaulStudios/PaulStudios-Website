@@ -1,8 +1,9 @@
 from django.test import TestCase
+
 from fake import FAKER
 
-from .models import UserProfile, validate_country
-from .utilities import fake_country
+from profiles.models import UserProfile, validate_country
+from profiles.utilities import fake_country
 
 
 class UserProfileModelTests(TestCase):
@@ -20,7 +21,9 @@ class UserProfileModelTests(TestCase):
         )
 
     def test_full_name(self):
-        self.assertEqual(self.user.full_name, self.user.first_name + " " + self.user.last_name)
+        name = self.user.first_name + " " + self.user.last_name
+        self.assertEqual(self.user.full_name, name)
 
-    def test_countries_exist(self):
+    def test_countries_validation(self):
         self.assertEqual(validate_country(self.user.country), self.user.country)
+

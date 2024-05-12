@@ -7,11 +7,7 @@ from .models import UserProfile
 
 
 def index(request):
-    if request.user.is_authenticated:
-        name = request.user.full_name
-    else:
-        name = "Anonymous"
-    return HttpResponse(f"Hello {name}. You're at the profile index.")
+    return render(request,'profiles/index.html', {})
 
 @login_required
 def detail(request):
