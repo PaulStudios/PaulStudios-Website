@@ -5,9 +5,16 @@
   <title>Login</title>
 </head>
 {% block content %}
-<div class="shadow-lg p-3 mb-5 bg-body rounded">
-
-<div class="mx-auto text-primary" style="width: 200px;">
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <div class="card mt-5">
+      <div class="card-body text-center">
+        <img src="https://i.imgur.com/nC2m7Fi.jpeg"
+                             class="img-fluid mb-3"
+                             alt="PaulStudios Logo"
+                             style="max-width: 150px;">
+      <div class="shadow-lg p-3 mb-5 bg-body rounded ">
+<div class="mx-auto text-primary d-flex justify-content-center" style="width: 200px;">
   <h1>Login</h1>
 </div>
   <form method="post">
@@ -15,5 +22,11 @@
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="Log in to PaulStudios">Sign in</button>
   </form>
-  Need An Account? <a href='{%url 'register'%}'>Sign Up</a></form></div>
+        <h6>
+  Need An Account? <a href='{%url 'register'%}'>Sign Up</a></h6>
+</div>
+    </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

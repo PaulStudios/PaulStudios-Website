@@ -18,7 +18,7 @@ def index(request):
 
 @login_required
 def detail(request):
-    return HttpResponse("You're looking at the profile of %s." % request.user.username)
+    return render(request,'profiles/info.html')
 
 @login_required
 def user_logout(request):
