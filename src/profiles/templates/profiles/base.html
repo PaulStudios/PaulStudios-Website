@@ -11,14 +11,51 @@
     {% endblock title %}
   </title>
 </head>
-<body>
-<div class="bg-image"
+<body style="height: 100%; overflow: hidden">
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark" style="background-color: #123670;">
+      &nbsp;&nbsp;&nbsp;
+  <a class="navbar-brand" href="{%url 'profiles:index'%}">
+    <img src="{% static 'logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+    Paul Studios
+  </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">JarvisAI</a>
+      </li>
+      </ul>
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0 ms-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{%url 'profiles:info'%}">
+          <img src="{% static 'profiles/account.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+        </a>
+      </li>&nbsp;&nbsp;
+      <li class="nav-item">
+    <a class="nav-link" href="{%url 'profiles:login'%}">
+      Login
+    </a>
+    </li>&nbsp;&nbsp;
+      <li class="nav-item">
+    <a class="nav-link" href="{%url 'profiles:register'%}">
+      Register
+    </a>
+      </li>&nbsp;&nbsp;&nbsp;&nbsp;
+    </ul>
+  </div>
+</nav>
+  <div class="bg-image"
   style="
     background-image: url({% static 'profiles/bg.png' %});
     height: 100vh;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
+    background-position: 0px 30px;
     ">
   <div class="container" style="">
     {% block content %}
