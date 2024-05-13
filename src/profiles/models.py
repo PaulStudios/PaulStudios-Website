@@ -32,8 +32,18 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField("First Name", max_length=40)
     last_name = models.CharField("Last Name", max_length=40)
     country = models.CharField("Country", max_length=50, validators=[validate_country])
-    username = models.CharField("Username", max_length=100, unique=True)
-    email = models.EmailField("Email", max_length=55, unique=True)
+    username = models.CharField("Username",
+                                max_length=100, unique=True,
+                                error_messages={
+                                    'unique': "A user with that username already exists.",
+                                },
+                                )
+    email = models.EmailField("Email",
+                              max_length=70, unique=True,
+                              error_messages={
+                                  'unique': "A user with that email already exists.",
+                              },
+                              )
     password = models.CharField("Password", max_length=254)
     is_admin = models.BooleanField("Is ADMIN?", default=False)
     activation_key = models.CharField(max_length=120, blank=True, null=True)
@@ -45,7 +55,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     updated = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["first_name", "last_name", "country", "email", "password", "register_ip"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "country", "email"]
 
     objects = UserManager()
 
@@ -58,16 +68,17 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """Returns the person's full name."""
         return f"{self.first_name} {self.last_name}"
 
-    def send_activation_email(self):
+    def send_activation_email(self, req):
         if not self.activated:
-            self.activation_key = code_generator()  # 'somekey' #gen key
+            self.activation_key = code_generator()   #generate key
             self.save()
-            path_ = reverse('activate', kwargs={"code": self.activation_key})
-            full_path = "https://muypicky.com" + path_
-            subject = 'Activate Account'
-            from_email = settings.DEFAULT_FROM_EMAIL
-            message = f'Activate your account here: {full_path}'
-            recipient_list = [self.user.email]
+            path_ = reverse('profiles:activate', kwargs={"code": self.activation_key})
+            full_path = req.build_absolute_uri(reverse("backend:send-activation-mail")) + path_
+            subject = '[PaulStudios] Activate Account'
+            from_email = settings.EMAIL_HOST_USER
+            message = f'''Activate your account here: 
+                        {full_path}'''
+            recipient_list = [self.email]
             html_message = f'<p>Activate your account here: {full_path}</p>'
             print(html_message)
             sent_mail = send_mail(
@@ -77,6 +88,5 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
                 recipient_list,
                 fail_silently=False,
                 html_message=html_message)
-            sent_mail = False
             return sent_mail
         return "FAILED"

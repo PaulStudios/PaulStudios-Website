@@ -1,0 +1,55 @@
+{% extends 'profiles/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}
+Paul Studios | Register
+{% endblock title %}
+
+{% block content %}
+<div class="text-center">
+    <br>
+    <img src="{% static 'logo.png' %}"
+                             class="img-fluid mb-3"
+                             alt="PaulStudios Logo"
+                             style="max-width: 150px;">
+            <div class="mx-auto d-flex justify-content-center" style="width: 200px;color: skyblue;">
+                <h1 class="fw-bold">Register</h1>
+            </div></div>
+    <form method="post">
+        <div class="text-light fw-bold">
+        {% csrf_token %}
+        {% crispy form %}
+            <div></div>
+            <strong>Password Strength:</strong>&nbsp;&nbsp;&nbsp;
+            <div id="password-strength" style="display:inline-block">Please enter a password.</div>
+        </div>
+    </form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const passwordInput = document.getElementById('password-input');
+    const passwordStrengthField = document.getElementById('password-strength');
+
+    passwordInput.addEventListener('input', function () {
+        const password = passwordInput.value;
+        const result = zxcvbn(password);
+
+        // Update password strength feedback
+        passwordStrengthField.innerHTML = ''; // Clear previous feedback
+
+        if (result.score === 0) {
+            passwordStrengthField.innerHTML = '<span style="color: red;">Very Weak</span>';
+        } else if (result.score === 1) {
+            passwordStrengthField.innerHTML = '<span style="color: orange;">Weak</span>';
+        } else if (result.score === 2) {
+            passwordStrengthField.innerHTML = '<span style="color: yellow;">Medium</span>';
+        } else if (result.score === 3) {
+            passwordStrengthField.innerHTML = '<span style="color: green;">Strong</span>';
+        } else if (result.score === 4) {
+            passwordStrengthField.innerHTML = '<span style="color: darkgreen;">Very Strong</span>';
+        }
+    });
+});
+</script>
+{% endblock %}

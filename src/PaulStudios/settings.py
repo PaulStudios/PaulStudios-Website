@@ -20,6 +20,7 @@ environ.Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 from django.core.management.commands.runserver import Command as runserver
+
 if "PORT" in os.environ:
     runserver.default_port = env("PORT")
     runserver.default_host = "0.0.0.0"
@@ -30,7 +31,7 @@ if "PORT" in os.environ:
 # SECURITY WARNING: keep the secret key used in production secret!
 if 'test' in sys.argv:
     SECRET_KEY = "56557s45NY&S$N5^$%n^$%s6n%bdty"
-else: 
+else:
     SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -42,6 +43,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "paulstudios-website.onrender.com"]
 
 INSTALLED_APPS = [
     'profiles',
+    'base',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',
@@ -98,6 +100,10 @@ if 'test' in sys.argv:
 else:
     DATABASES = {
         'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        },
+        'main23': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': env("DB_NAME"),
             'USER': env("DB_USER"),
@@ -139,8 +145,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -168,5 +172,10 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
-
+if not 'test' in sys.argv:
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env("EMAIL_PORT")
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+    EMAIL_SUBJECT_PREFIX = "[PaulStudios] "
+    EMAIL_USE_TLS = True

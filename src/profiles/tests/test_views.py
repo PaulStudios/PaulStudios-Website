@@ -18,6 +18,7 @@ class InfoViewTests(TestCase):
             email=FAKER.email(),
             password=FAKER.slug(),
             is_admin=False,
+            activated=True,
             register_ip=FAKER.ipv4()
         )
 

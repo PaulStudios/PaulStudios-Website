@@ -1,0 +1,20 @@
+{% extends 'profiles/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+Paul Studios | Errors | Unverified Mail
+{% endblock title %}
+{% block content %}
+<p style="height:220px"></p>
+<div class="text-center">
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="50" height="50" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+        <h1 class="alert-heading text-center">Mail Unverified!</h1>
+        Your account has not yet been activated. Please click on below link to send an activation link your email.
+        <br>
+        Before verification, you will not be able to access PaulStudios Apps and Services.
+        <hr>
+        <a href="{% url 'backend:send-activation-mail' %}" class="alert-link"> Click here to send activation mail.</a>
+        <p class="mb-0"></p>
+    </div>
+</div>
+{% endblock %}
