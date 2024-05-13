@@ -1,12 +1,13 @@
 {% extends 'profiles/base.html' %}
 {% block content %}
-    <div class="mx-auto text-success" style="width: 200px;">
-        <h1 class="text-success">Logged out</h1>
+<p style="height:220px"></p>
+<div class="text-center">
+    <div class="alert alert-success" role="alert" id="message_logout">
+        <h1 class="alert-heading text-center">Success!</h1>
+        You have been successfully logged out! Hope you enjoyed our services.
+        <hr>
+        <a href="{% url 'profiles:login' %}" class="alert-link"> Click here to log in again.</a>
+        <p class="mb-0"></p>
     </div>
-    <div class="text-light">
-        <p>
-            You have been successfully logged out.
-            <a href="{% url 'profiles:login' %}"> Click here to log in again.</a>
-        </p>
-    </div>
+</div>
 {% endblock %}

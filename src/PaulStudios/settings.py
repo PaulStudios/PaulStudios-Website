@@ -20,7 +20,8 @@ environ.Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 from django.core.management.commands.runserver import Command as runserver
-runserver.default_port = env("PORT")
+if "PORT" in os.environ:
+    runserver.default_port = env("PORT")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
