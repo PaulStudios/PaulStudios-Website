@@ -73,19 +73,18 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
             self.activation_key = code_generator()   #generate key
             self.save()
             path_ = reverse('profiles:activate', kwargs={"code": self.activation_key})
-            full_path = req.build_absolute_uri(reverse("backend:send-activation-mail")) + path_
+            full_path = "http://" + req.get_host() + path_
             subject = '[PaulStudios] Activate Account'
             from_email = settings.EMAIL_HOST_USER
-            message = f'''Activate your account here: 
-                        {full_path}'''
+            message = f'''<a href='{full_path}'>Activate your account </a>'''
             recipient_list = [self.email]
-            html_message = f'<p>Activate your account here: {full_path}</p>'
+            html_message = f"<p><a href='{full_path}'>Activate your account </a></p>"
             print(html_message)
             sent_mail = send_mail(
-                subject,
-                message,
-                from_email,
-                recipient_list,
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
                 fail_silently=False,
                 html_message=html_message)
             return sent_mail

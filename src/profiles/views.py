@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from .decorators import activated_user_required
 from .forms import RegistrationForm
 from .models import UserProfile
 
@@ -45,9 +45,8 @@ def handler404(request, exception, template_name="profiles/404.html"):
 
 
 @login_required
+@activated_user_required
 def detail(request):
-    if not request.user.activated:
-        return redirect(reverse("profiles:error_page", kwargs={'type':'mail_verify'}))
     return render(request, 'profiles/info.html')
 
 
