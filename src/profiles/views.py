@@ -73,7 +73,7 @@ def Register(request):
 
                 user.save()
                 messages.success(request, "User registered. Please activate your profile by verifying your email.")
-                return redirect(reverse("profiles:error_page") + "/mail_verify")  # Redirect to the login page
+                return redirect(reverse("profiles:error_page", kwargs={'type':'mail_verify'})  # Redirect to the login page
             else:
                 # Handle password mismatch error here
                 form.add_error('password2', 'Passwords entered do not match')
