@@ -38,10 +38,8 @@ def index(request):
     return render(request, 'profiles/index.html', {})
 
 
-def handler404(request, exception, template_name="profiles/404.html"):
-    response = render(template_name)
-    response.status_code = 404
-    return response
+def custom_404(request, exception):
+    return render(request, 'profiles/404.html', status=404)
 
 
 @login_required
@@ -73,7 +71,7 @@ def Register(request):
 
                 user.save()
                 messages.success(request, "User registered. Please activate your profile by verifying your email.")
-                return redirect(reverse("profiles:error_page", kwargs={'type':'mail_verify'})  # Redirect to the login page
+                return redirect(reverse("profiles:error_page", kwargs={'type':'mail_verify'}))  # Redirect to the login page
             else:
                 # Handle password mismatch error here
                 form.add_error('password2', 'Passwords entered do not match')

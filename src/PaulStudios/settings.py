@@ -35,8 +35,7 @@ else:
     SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = False
 ALLOWED_HOSTS = ["127.0.0.1", "paulstudios-website.onrender.com"]
 
 # Application definition
@@ -99,11 +98,11 @@ if 'test' in sys.argv:
     }
 else:
     DATABASES = {
-        'default': {
+        'dev': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         },
-        'main23': {
+        'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': env("DB_NAME"),
             'USER': env("DB_USER"),
@@ -179,3 +178,16 @@ if not 'test' in sys.argv:
     EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
     EMAIL_SUBJECT_PREFIX = "[PaulStudios] "
     EMAIL_USE_TLS = True
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://a557f7fc74dd3401992614667b378c8d@o4507252598964224.ingest.de.sentry.io/4507252601847888",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
