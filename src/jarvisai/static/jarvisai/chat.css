@@ -1,0 +1,86 @@
+.chat-message {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.sender-name {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.user-message {
+    background-color: #f0f0f0;
+}
+
+.bot-message {
+    background-color: #e6f7ff;
+}
+
+#chat_box {
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+    max-height: 400px; /* Increased max height */
+    width: 90%; /* Adjusted width to be 80% of the parent */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Custom scroll bar styles */
+#chat_box::-webkit-scrollbar {
+    width: 12px; /* Width of the scroll bar */
+}
+
+#chat_box::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Color of the scroll bar track */
+    border-radius: 10px; /* Rounded corners for the track */
+}
+
+#chat_box::-webkit-scrollbar-thumb {
+    background: #888; /* Color of the scroll bar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+#chat_box::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker color for the thumb when hovered */
+}
+
+/* Firefox scrollbar styles */
+#chat_box {
+    scrollbar-width: thin; /* Make scrollbar thinner */
+    scrollbar-color: #888 #f1f1f1; /* Scrollbar thumb and track colors */
+}
+
+/* Internet Explorer and Edge scrollbar styles */
+@supports (-ms-overflow-style: none) {
+    #chat_box {
+        -ms-overflow-style: -ms-autohiding-scrollbar; /* Auto-hiding scrollbars */
+    }
+}
+#message_input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: calc(100% - 90px); /* Adjust width based on other elements */
+    font-size: 14px;
+    color: #333;
+}
+
+#send_button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#send_button:hover {
+    background-color: #0056b3;
+    transition: background-color 0.3s ease;
+}

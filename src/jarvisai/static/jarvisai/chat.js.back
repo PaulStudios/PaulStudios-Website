@@ -1,0 +1,71 @@
+var url = ""
+var i = 1
+
+document.getElementById("send_button").addEventListener("click", function() {
+    url = this.getAttribute("data-url");
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const messageInput = document.querySelector('#message_input');
+    const sendButton = document.querySelector('#send_button');
+    const chatBox = document.querySelector('#chat_box');
+
+    // Function to add a message to the chat box
+    function addMessage(sender, message, className) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('chat-message', className);
+
+        // Create a span for the sender's name
+        const senderElement = document.createElement('span');
+        senderElement.classList.add('sender-name');
+        senderElement.textContent = `${sender}: `;
+
+        // Create a span for the message content
+        const messageContentElement = document.createElement('span');
+        // Replace newline characters with <br> for multi-line messages
+        messageContentElement.innerHTML = message.replace(/\n/g, '<br>');
+
+        // Append sender and message content to the message element
+        messageElement.appendChild(senderElement);
+        messageElement.appendChild(messageContentElement);
+
+        // Append the message element to the chat box
+        chatBox.appendChild(messageElement);
+
+        // Scroll to the bottom of the chat box
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Function to handle sending a message
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message !== '') {
+            addMessage(username, message, 'user-message');
+            // Send message to the backend for bot response
+            const data1 = {msg1:message}
+            const botResponse = ""
+            $.post(url, data1, (data, status) => {
+                const botResponse = data.response;
+                addMessage('JarvisAI', botResponse, 'bot-message');
+            });
+            messageInput.value = '';
+        }
+    }
+
+    // Event listener for the send button
+    sendButton.addEventListener('click', sendMessage);
+
+    // Event listener for pressing Enter key in the message input
+    messageInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            sendMessage();
+        }
+    });
+
+    if (i === 1) {
+    message = "Welcome to JarvisAI v0.5.1.\n You can chat with Jarvis and he will respond just like a human."
+        addMessage("PaulStudios", message, 'bot-message');;
+        i = 0
+    };
+});

@@ -31,4 +31,5 @@ urlpatterns = [
     path('profiles/', include("profiles.urls")),
     path('backend/', include("base.urls")),
     path('sentry-debug/', trigger_error),
+    path('jarvisai/', include("jarvisai.urls")),
 ]

@@ -1,0 +1,39 @@
+{% extends 'profiles/base.html' %}
+{% load static %}
+
+{% block title %}
+Paul Studios | JarvisAI
+{% endblock title %}
+
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href="{% static 'jarvisai/chat.css' %}">
+<script src="{% static 'jarvisai/chat.js' %}"></script>
+<link rel="stylesheet" href="{% static 'jarvisai/multicolor.css' %}">
+<script defer src="{% static 'jarvisai/multicolor.js' %}"></script>
+{% endblock extra_head %}
+
+{% block content %}
+     <div class="container-fluid" id="chat_container">
+        <div id="flashy_heading_container">
+            <h1 id="flashy_heading" class="text-center">Chat with JarvisAI</h1>
+        </div>
+        <div class="row">
+            <div class="col-md-8" id="main_content">
+                <div id="chat_log" class="chat-box border p-3 mb-3" style="background-color: rgba(0, 0, 0, 0.5);"></div>
+                <div id="input_container" class="input-group mb-3">
+                    <input type="text" id="message_input" class="form-control" placeholder="Type your message here...">
+                    <button data-url="{% url 'jarvisai:bot_response' %}" id="send_button" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+            <div class="col-md-4" id="sidebar">
+                <h2>Chat History</h2>
+                <div id="chat_history" class="list-group"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const username = "{{ username }}";  // Accessing username from template context
+    </script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="{% static 'jarvisai/chat.js' %}"></script>
+{% endblock %}
