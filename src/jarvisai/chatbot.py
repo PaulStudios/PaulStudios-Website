@@ -4,6 +4,8 @@ Chatbot functions
 import datetime
 import ChatbotAPI
 
+import PaulStudios
+
 brainid = PaulStudios.settings.BRAINID
 brainkey = PaulStudios.settings.BRAINKEY
 
