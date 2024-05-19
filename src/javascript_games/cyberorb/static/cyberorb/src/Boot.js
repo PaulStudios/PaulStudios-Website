@@ -5,8 +5,8 @@ var Ball = {
 Ball.Boot = function(game) {};
 Ball.Boot.prototype = {
 	preload: function() {
-		this.load.image('preloaderBg', 'img/loading-bg.png');
-		this.load.image('preloaderBar', 'img/loading-bar.png');
+		this.load.image('preloaderBg', assetsUrls.images.load_bg);
+		this.load.image('preloaderBar', assetsUrls.images.load_bar);
 	},
 	create: function() {
 		this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;

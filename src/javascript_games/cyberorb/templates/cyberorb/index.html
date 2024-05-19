@@ -1,15 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<style> body { margin: 0; background: #2B2E31 url(img/screen-bg.png) repeat; } </style>
-	<script src="src/phaser-arcade-physics.2.2.2.min.js"></script>
-	<script src="src/Boot.js"></script>
-	<script src="src/Preloader.js"></script>
-	<script src="src/MainMenu.js"></script>
-	<script src="src/Howto.js"></script>
-	<script src="src/Game.js"></script>
-</head>
-<body>
+{% extends 'profiles/base.html' %}
+{% load static %}
+
+{% block title %}
+Paul Studios | Games | CyberOrb
+{% endblock title %}
+
+{% block extra_head %}
+	<style>
+		body {
+			margin: 0;
+			background-image: url({% static 'cyberorb/img/screen-bg.png' %});
+			background-repeat: repeat;
+		}
+	</style>
+	<script>
+		// Create a dictionary to hold the static file URLs
+        var assetsUrls = {
+            images: {
+				load_bg: "{% static 'cyberorb/img/loading-bg.png' %}",
+				load_bar: "{% static 'cyberorb/img/loading-bar.png' %}",
+                ball: "{% static 'cyberorb/img/ball.png' %}",
+                hole: "{% static 'cyberorb/img/hole.png' %}",
+                elementW: "{% static 'cyberorb/img/element-w.png' %}",
+                elementH: "{% static 'cyberorb/img/element-h.png' %}",
+                panel: "{% static 'cyberorb/img/panel.png' %}",
+                title: "{% static 'cyberorb/img/title.png' %}",
+                buttonPause: "{% static 'cyberorb/img/button-pause.png' %}",
+                screenBg: "{% static 'cyberorb/img/screen-bg.png' %}",
+                screenMainmenu: "{% static 'cyberorb/img/screen-mainmenu.png' %}",
+                screenHowtoplay: "{% static 'cyberorb/img/screen-howtoplay.png' %}",
+                borderHorizontal: "{% static 'cyberorb/img/border-horizontal.png' %}",
+                borderVertical: "{% static 'cyberorb/img/border-vertical.png' %}",
+                buttonAudio: "{% static 'cyberorb/img/button-audio.png' %}",
+                buttonStart: "{% static 'cyberorb/img/button-start.png' %}",
+            },
+            audio: {
+                audioBounceOgg: "{% static 'cyberorb/audio/bounce.ogg' %}",
+                audioBounceMp3: "{% static 'cyberorb/audio/bounce.mp3' %}",
+                audioBounceM4a: "{% static 'cyberorb/audio/bounce.m4a' %}"
+            }
+        };
+	</script>
+	<script src={% static "cyberorb/src/phaser-arcade-physics.2.2.2.min.js" %}></script>
+	<script src={% static "cyberorb/src/Boot.js" %}></script>
+	<script src={% static "cyberorb/src/Preloader.js" %}></script>
+	<script src={% static "cyberorb/src/MainMenu.js" %}></script>
+	<script src={% static "cyberorb/src/Howto.js" %}></script>
+	<script src={% static "cyberorb/src/Game.js" %}></script>
+{% endblock extra_head %}
+
+{% block content %}
 <script>
 (function() {
 	var game = new Phaser.Game(320, 480, Phaser.CANVAS, 'game');
@@ -21,5 +61,4 @@
 	game.state.start('Boot');
 })();
 </script>
-</body>
-</html>
+{% endblock %}

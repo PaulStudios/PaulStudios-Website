@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'profiles',
     'base',
     'jarvisai',
+    'javascript_games.cyberorb',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',

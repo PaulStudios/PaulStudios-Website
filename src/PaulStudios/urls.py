@@ -32,4 +32,5 @@ urlpatterns = [
     path('backend/', include("base.urls")),
     path('sentry-debug/', trigger_error),
     path('jarvisai/', include("jarvisai.urls")),
+    path('javascript_games/cyberorb', include("javascript_games.cyberorb.urls")),
 ]
