@@ -11,4 +11,4 @@ class ChatMessage(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username}: {self.message[:50]}...'
+        return f'{self.user.username}: {self.message} / {self.response}'

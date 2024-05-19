@@ -36,8 +36,9 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["https://a0d6-103-76-82-163.ngrok-free.app"]
 
-# Application definitionsssssssssssssssssssssssssssssss
+# Application definitions
 
 INSTALLED_APPS = [
     'profiles',
@@ -102,7 +103,7 @@ else:
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         },
-        'db': {
+        'default1': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': env("DB_NAME"),
             'USER': env("DB_USER"),

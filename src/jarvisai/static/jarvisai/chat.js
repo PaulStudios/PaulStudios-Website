@@ -24,15 +24,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function sendMessage() {
             const message = messageInput.val().trim();
+            messageInput.val("")
             if (message === '') return;
 
-            addMessage('You', message, 'user-message');
+            addMessage(username, message, 'user-message');
 
             const data1 = {msg1:message}
             const botResponse = ""
             $.post(url, data1, (data, status) => {
                 const botResponse = data.response;
                 addMessage('JarvisAI', botResponse, 'bot-message');
+                fetchChatHistory();
             });
             messageInput.value = '';
         }
@@ -63,23 +65,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
         function fetchChatHistory() {
-            $.getJSON('/jarvisai/chat/history', function(data) {
-                data.forEach(chat => {
-                    const chatItem = $('<div>').addClass('list-group-item chat-history-item').text(`${chat.timestamp} - ${chat.message}`);
-                    chatItem.click(() => loadChat(chat.id));
-                    chatHistory.append(chatItem);
-                });
+        chatHistory.empty();
+        $.getJSON('/jarvisai/chat/history', function(data) {
+            data.forEach(chat => {
+                const chatItem = $('<div>').addClass('list-group-item chat-history-item')
+                    .html(`<div><strong>User:</strong> ${chat.user_message}</div><div><strong>Bot:</strong> ${chat.bot_response}</div><div><small>${chat.timestamp}</small></div>`);
+                chatItem.click(() => loadChat(chat.id));
+                chatHistory.append(chatItem);
             });
-        }
+        });
+    }
 
-        function loadChat(chatId) {
-            $.getJSON(`/jarvisai/chat/history/${chatId}`, function(data) {
-                chatLog.empty();
-                data.messages.forEach(msg => {
-                    addMessage(msg.sender, msg.message);
-                });
-            });
-        }
+    function loadChat(chatId) {
+        $.getJSON(`/jarvisai/chat/history/${chatId}`, function(data) {
+            chatLog.empty();
+            console.log(data.messages)
+            msgs = data.messages
+            addMessage(msgs[0].sender, msgs[0].message, 'user-message', );
+            addMessage(msgs[1].sender, msgs[1].message, 'bot-message', );
+        });
+    }
 
         function getCookie(name) {
             let cookieValue = null;
@@ -97,9 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (i === 1) {
-    message = "Welcome to JarvisAI v0.5.1.\n You can chat with Jarvis and he will respond just like a human."
-        addMessage("PaulStudios", message, 'bot-message');;
-        i = 0
-    };
+            message = "Welcome to JarvisAI v0.5.1.\n You can chat with Jarvis and he will respond just like a human."
+            addMessage("PaulStudios", message, 'bot-message');;
+            i = 0
+        }
     });
 });
