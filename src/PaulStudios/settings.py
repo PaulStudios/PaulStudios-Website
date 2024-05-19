@@ -183,3 +183,6 @@ if not 'test' in sys.argv:
 if 'test' in sys.argv:
     BRAINID = env("BRAINID")
     BRAINKEY = env("BRAINKEY")
+else:
+    BRAINID = "test"
+    BRAINKEY = "tester"
