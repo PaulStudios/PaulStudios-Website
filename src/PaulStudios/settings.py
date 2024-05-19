@@ -179,3 +179,7 @@ if not 'test' in sys.argv:
     EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
     EMAIL_SUBJECT_PREFIX = "[PaulStudios] "
     EMAIL_USE_TLS = True
+
+if 'test' in sys.argv:
+    BRAINID = env("BRAINID")
+    BRAINKEY = env("BRAINKEY")

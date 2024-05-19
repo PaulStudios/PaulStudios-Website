@@ -3,10 +3,9 @@ Chatbot functions
 """
 import datetime
 import ChatbotAPI
-import environ
 
-env = environ.Env()
-environ.Env.read_env()
+brainid = PaulStudios.settings.BRAINID
+brainkey = PaulStudios.settings.BRAINKEY
 
 def wish_me():
     """Wish the user"""
@@ -24,8 +23,8 @@ class Bot:
     def __init__(self):
         self.reply: str = "No response has been generated yet..."
         self.Chatbot: ChatbotAPI.ChatBot = ChatbotAPI.ChatBot(
-            env("BRAINID"),
-            env("BRAINKEY"),
+            brainid,
+            brainkey,
             history=True,
             debug=True)
 
