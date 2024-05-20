@@ -19,8 +19,6 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 from django.urls import path
 
-def trigger_error(request):
-    division_by_zero = 1 / 0
     
 handler404 = "profiles.views.custom_404"
 
@@ -30,7 +28,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('profiles/', include("profiles.urls")),
     path('backend/', include("base.urls")),
-    path('sentry-debug/', trigger_error),
     path('jarvisai/', include("jarvisai.urls")),
-    path('javascript_games/cyberorb', include("javascript_games.cyberorb.urls")),
 ]

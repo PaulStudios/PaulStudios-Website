@@ -2,6 +2,9 @@ from django.test import TestCase
 
 from fake import FAKER
 
+import django
+django.setup()
+
 from profiles.models import UserProfile, validate_country
 from profiles.utilities import fake_country
 

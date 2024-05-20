@@ -3,6 +3,9 @@ from django.test import TestCase
 from django.urls import reverse
 from fake import FAKER
 
+import django
+django.setup()
+
 from profiles.models import UserProfile
 from profiles.utilities import fake_country
 
