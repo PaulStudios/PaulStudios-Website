@@ -45,7 +45,6 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
                               },
                               )
     password = models.CharField("Password", max_length=254)
-    is_admin = models.BooleanField("Is ADMIN?", default=False)
     activation_key = models.CharField(max_length=120, blank=True, null=True)
     activated = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)

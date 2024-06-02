@@ -254,6 +254,8 @@ eggs/
 lib/
 lib64/
 parts/
+venv-pycharm/
+src/venv
 sdist/
 var/
 wheels/
@@ -333,3 +335,7 @@ GitHub.sublime-settings
 .history
 
 /src/staticfiles
+/src/songdownloader/media_production
+/src/songdownloader/media_development
+/src/media
+/src/media_development

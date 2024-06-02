@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from profiles.decorators import activated_user_required
+from profiles.views import user_check
 from .chatbot import Bot
 from .models import ChatMessage
 
@@ -12,9 +12,9 @@ bot = Bot()
 
 
 @csrf_exempt
-@login_required
-@activated_user_required
 def chat_view(request):
+    c = user_check(request)
+    if c: return c
     user = request.user
     return render(request, 'jarvisai/chat.html', {'username': user.first_name, 'first_name': user.first_name})
 

@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
     
 handler404 = "profiles.views.custom_404"
@@ -29,4 +32,11 @@ urlpatterns = [
     path('profiles/', include("profiles.urls")),
     path('backend/', include("base.urls")),
     path('jarvisai/', include("jarvisai.urls")),
+    path('song-downloader/', include("songdownloader.urls")),
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon/favicon.ico'))),
 ]
+
+
+  
+if settings.DEBUG:
+        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

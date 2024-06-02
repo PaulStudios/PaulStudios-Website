@@ -13,9 +13,16 @@ import os
 import sys
 from pathlib import Path
 import environ
+from decouple import config
+import dj_database_url
 
 env = environ.Env()
 environ.Env.read_env()
+
+DATABASE_URL = config('DATABASE_URL')
+
+MODE = "production"
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -44,6 +51,7 @@ INSTALLED_APPS = [
     'profiles',
     'base',
     'jarvisai',
+    'songdownloader',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',
@@ -85,33 +93,30 @@ TEMPLATES = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
+]
+
 WSGI_APPLICATION = 'PaulStudios.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'local_testing.sqlite'
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        },
-        'default1': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': env("DB_NAME"),
-            'USER': env("DB_USER"),
-            'PASSWORD': env("DB_PASSWORD"),
-            'HOST': env("DB_HOST"),
-            'PORT': env("DB_PORT"),
-        }
-    }
+DATABASE_LIST = {
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'local_testing.sqlite'
+    },
+    'dev': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'prod': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+}
+
+if 'test' not in sys.argv:
+    DATABASE_LIST['web'] = {'ENGINE': 'django.db.backends.postgresql_psycopg2','NAME': env("DB_NAME"),'USER': env("DB_USER"),'PASSWORD': env("DB_PASSWORD"),'HOST': env("DB_HOST"),'PORT': env("DB_PORT")}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -136,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -172,6 +177,8 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+MEDIA_URL = '/media/'
+
 if not 'test' in sys.argv:
     EMAIL_HOST = env("EMAIL_HOST")
     EMAIL_PORT = env("EMAIL_PORT")
@@ -186,3 +193,38 @@ if not 'test' in sys.argv:
 else:
     BRAINID = "test"
     BRAINKEY = "tester"
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_TASK_TRACK_STARTED = True
+
+CELERY_WORKER_SEND_TASK_EVENTS = True
+CELERY_TASK_SEND_SENT_EVENT = True
+
+SESAME_MAX_AGE = 30
+
+SONGDOWNLOADER_SPOTIFY_CLIENT_ID = env("SPOTIFY_CLIENT_ID")
+SONGDOWNLOADER_SPOTIFY_CLIENT_SECRET = env("SPOTIFY_CLIENT_SECRET")
+GCS_API_KEY = env("GCS_API_KEY")
+GCS_ENGINE_ID = env("GCS_ENGINE_ID")
+YT_API_KEY = env("YT_API_KEY")
+
+if MODE == "development":
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media_development')
+    REDIS_URL = 'redis://localhost:6379/1'
+    if "test" in sys.argv:
+        DATABASES = {'default': DATABASE_LIST.get("test")}
+    else: DATABASES = {'default': DATABASE_LIST.get("dev")}
+elif MODE == "production":
+    CELERY_BROKER_URL = 'redis://redis:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    REDIS_URL = 'redis://redis:6379/1'
+    DATABASES = {'default': DATABASE_LIST.get("prod")}
+    DEBUG = False
+else:
+    raise Exception("Invalid mode. Please check PaulStudios/settings.py")

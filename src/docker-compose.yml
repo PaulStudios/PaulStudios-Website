@@ -1,0 +1,144 @@
+services:
+  db:
+    image: postgres:16.3-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=main
+      - POSTGRES_USER=web
+      - POSTGRES_PASSWORD=authcode
+
+  redis:
+    image: redis:7.2.5-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+
+  nginx:
+      image: nginx:alpine
+      restart: unless-stopped
+      ports:
+        - "80:80"
+      volumes:
+        - ./staticfiles/:/var/www/static/
+        - ./media/:/var/www/media/
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+      depends_on:
+        - web
+
+  web:
+    image: hilfing/paulstudios-website:0.6.0-beta
+    command: gunicorn --config gunicorn.conf.py --statsd-host=statsd-exporter:9125 --statsd-prefix=paulstudios.web PaulStudios.wsgi:application
+    volumes:
+      - .:/home/app/webapp
+    expose:
+      - "8000"
+    env_file:
+      - ./PaulStudios/.env
+    depends_on:
+      - db
+      - redis
+    environment:
+      - APP_NAME="PaulStudios"
+      - STATSD_HOST="statsd-exporter"
+      - STATSD_PORT="9125"
+
+  worker:
+    image: hilfing/paulstudios-website:0.6.0-beta
+    command: celery -A PaulStudios worker --loglevel=info -c 3
+    restart: unless-stopped
+    volumes:
+      - .:/home/app/webapp
+    env_file:
+      - ./PaulStudios/.env
+    scale: 5
+    depends_on:
+      - db
+      - redis
+
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_PERSISTENT=True
+      - FLOWER_STATE_SAVE_INTERVAL=10000
+    ports:
+      - "5555:5555"
+    volumes:
+      - flower_data:/data
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  # Grafana
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=adminauth                                            
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  # PostgreSQL Exporter
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://web:authcode@db:5432/main?sslmode=disable"
+    depends_on:
+      - db
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter
+    restart: unless-stopped
+    command:
+      - "--redis.addr=redis:6379"
+    depends_on:
+      - redis
+
+  statsd-exporter:
+    image: prom/statsd-exporter:v0.22.4
+    restart: unless-stopped
+    volumes:
+      - "./statsd:/statsd" # mapping file
+    command:
+      - --statsd.mapping-config=/statsd/statsd.conf # options
+    depends_on:
+      - web
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+
+  celery-exporter:
+    image: danihodovic/celery-exporter
+    restart: unless-stopped
+    command: --broker-url=redis://redis
+    depends_on:
+      - redis
+
+
+volumes:
+  postgres_data:
+  grafana_data: 
+  redis_data:
+  flower_data:

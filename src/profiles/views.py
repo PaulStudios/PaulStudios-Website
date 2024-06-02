@@ -2,8 +2,9 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
+from PaulStudios import settings
 from .forms import RegistrationForm
 from .models import UserProfile
 
@@ -31,6 +32,17 @@ def get_client_ip(request):
             ip = proxies[0]
 
     return ip
+
+
+def user_check(request):
+    user = request.user
+    if not user.is_authenticated:
+        messages.error(request, 'You are not logged in.', extra_tags="danger")
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+    if not user.activated:
+        messages.error(request, 'You are not activated. Please verify your mail first!.', extra_tags="danger")
+        return redirect(reverse("profiles:error_page", kwargs={'type': "mail_verify"}))
+    return
 
 
 def index(request):
@@ -69,7 +81,8 @@ def Register(request):
 
                 user.save()
                 messages.success(request, "User registered. Please activate your profile by verifying your email.")
-                return redirect(reverse("profiles:error_page", kwargs={'type':'mail_verify'}))  # Redirect to the login page
+                return redirect(
+                    reverse("profiles:error_page", kwargs={'type': 'mail_verify'}))  # Redirect to the login page
             else:
                 # Handle password mismatch error here
                 form.add_error('password2', 'Passwords entered do not match')
@@ -82,6 +95,7 @@ def Register(request):
 def error_page(request, *args, type=None, **kwargs):
     if type == "mail_verify":
         return render(request, 'profiles/errors/mail_verify.html')
+
 
 def activate_user_view(request, *args, code=None, **kwargs):
     if code:

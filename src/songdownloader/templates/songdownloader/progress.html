@@ -1,0 +1,208 @@
+{% extends 'profiles/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Paul Studios | Song Downloader
+{% endblock title %}
+
+{% block extra_head %}
+<script>
+    const task_id = "{{task_id}}"
+</script>
+<style>
+#progress-container {
+    position: relative;
+    height: 30px;
+}
+
+#progress-bar {
+    background: linear-gradient(90deg, rgba(76, 175, 80, 1) 0%, rgba(139, 195, 74, 1) 50%, rgba(205, 220, 57, 1) 100%);
+}
+
+#progress-text {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    line-height: 30px;
+    color: #fff;
+    font-weight: bold;
+}
+
+#error-message {
+    color: red;
+}
+#failed-list .list-group-item {
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    color: #721c24;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+#failed-list .list-group-item a {
+    color: #721c24;
+    text-decoration: underline;
+}
+
+#failed-list .list-group-item a:hover {
+    color: #491217;
+}
+.image {
+    max-width: 200px;
+    height: auto;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: auto;
+    max-height: 500px;
+}
+</style>
+<link rel="stylesheet" href="{% static 'jarvisai/multicolor.css' %}">
+<script defer src="{% static 'jarvisai/multicolor.js' %}"></script>
+{% endblock extra_head %}
+
+{% block content %}
+    <div class="text-center">
+        <img src="{% static 'logo.png' %}"
+             class="img-fluid mb-3"
+             alt="PaulStudios Logo"
+             style="max-width: 150px;">
+    </div>
+    <div id="flashy_heading_container">
+        <h1 id="flashy_heading" class="text-center mx-auto d-flex justify-content-center">PaulStudios-SongDownloader</h1>
+    </div>
+        <div class="card bg-transparent" style="background-color: rgba(0, 0, 0, 0);">
+            <div class="text-center">
+                <img id="image" class="card-img-top image " src="/static/image_loading.svg" alt="Image">
+            </div>
+            <div class="card-body text-center">
+                <h5 class="card-title text-white" id="name">Loading...</h5>
+                <h6 class="card-text text-white"><strong>State:</strong> <span id="state" class="badge">Loading...</span></h6>
+            </div>
+
+    </div>
+    <br>
+    <div class="progress" id="progress-container">
+        <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        <h6 id="progress-text" class="text-primary">0.00%</h6>
+    </div>
+    <div id="error-message" class="alert alert-danger mt-3" style="display:none;">
+        <svg class="bi flex-shrink-0 me-2" width="50" height="50" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+        Failed to load progress data. Please try again later.
+    </div>
+    <hr>
+    <div id="failed-downloads" style="display: none;" class="mt-3 text-danger text-bold">
+        <h3>Failed Downloads:</h3>
+        <ul id="failed-list" class="list-group"></ul>
+    </div>
+    <a id="download-link" href="/download" class="btn btn-primary mt-3" style="display: none;">Download</a>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const errorMessage = document.getElementById('error-message');
+    const failedDownloadsContainer = document.getElementById('failed-downloads');
+    const failedList = document.getElementById('failed-list');
+    const downloadLink = document.getElementById('download-link');
+
+    downloadLink.href = `${window.location.origin}${window.location.pathname}/download`;
+
+    function updateProgress() {
+        fetch('/backend/task-progress/' + task_id)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                if (data.progress === null) {
+                    throw new Error('Invalid Task ID');
+                }
+                if (parseInt(data.progress) > parseInt(data.total)) {
+                    throw new Error('Invalid data structure');
+                }
+                let progress = parseInt(data.progress);
+                let total = parseInt(data.total);
+                let state = data.state;
+                const percentage = (progress / total) * 100;
+                progressBar.style.width = percentage.toFixed(2) + '%';
+                progressBar.setAttribute('aria-valuenow', percentage.toFixed(2));
+                progressText.textContent = percentage.toFixed(2) + '%';
+                displayData(data)
+
+                if (progress < total) {
+                    setTimeout(updateProgress, 1000);
+                } else if (progress === total && state !== 'SUCCESS') {
+                    progressText.textContent = 'Finalizing...';
+                    setTimeout(updateProgress, 1000);
+                } else if (state === 'SUCCESS') {
+                    progressText.textContent = 'Complete';
+                    const failed_downloads = data.details['extra']['failed_downloads']
+                    if (failed_downloads.length > 0) {
+                        failedDownloadsContainer.style.display = 'block';
+                        failedList.innerHTML = '';
+                        failed_downloads.forEach(item => {
+                            const listItem = document.createElement('li');
+                            listItem.classList.add('list-group-item');
+                            if (item.error.includes("age restricted")) {
+                                item.error = "Age-Restricted Song. Cannot be downloaded"
+                            } else if (item.error.includes("streaming live")) {
+                                item.error = "Song was Live-Streamed. Cannot be downloaded"
+                            } else if (item.error.includes("")) {
+                                item.error = "Failed to download."
+                            }
+                            listItem.innerHTML = `
+                                <strong>Name:</strong> ${item.name}<br>
+                                <strong>URL:</strong> <a href="${item.url}" target="_blank">${item.url}</a><br>
+                                <strong>Error:</strong> ${item.error}
+                            `;
+                            failedList.appendChild(listItem);
+                        });
+                    }
+                    downloadLink.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching progress:', error);
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            });
+    }
+
+    updateProgress();
+});
+function displayData(data) {
+    document.getElementById('state').textContent = data.state;
+    // Update badge color based on state
+    const stateBadge = document.getElementById('state');
+    stateBadge.classList.remove('bg-success', 'bg-danger', 'bg-primary');
+    if (data.state === 'SUCCESS') {
+        stateBadge.classList.add('bg-success');
+    } else if (data.state === 'FAILURE') {
+        stateBadge.classList.add('bg-danger');
+    } else {
+        stateBadge.classList.add('bg-primary');
+    }
+    document.getElementById('image').src = data.image;
+    document.getElementById('image').alt = data.current;
+    document.getElementById('name').textContent = data.current;
+    if (data.name) {
+        document.getElementById('name').textContent = data.current + " [" + data.name + "]";
+    }
+    if (data.current === "loading") {
+        document.getElementById('image').alt = data.name;
+        document.getElementById('name').textContent = data.name;
+    }
+}
+
+</script>
+{% endblock %}
