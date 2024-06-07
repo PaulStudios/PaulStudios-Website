@@ -60,7 +60,7 @@ six==1.16.0
 soupsieve==2.5
 sqlparse==0.5.0
 textblob==0.18.0.post0
-tornado==6.4
+tornado==6.4.1
 tqdm==4.66.4
 typing_extensions==4.12.1
 tzdata==2024.1
