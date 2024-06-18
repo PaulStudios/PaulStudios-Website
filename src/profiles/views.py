@@ -1,19 +1,25 @@
 import redis
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 from PaulStudios import settings
 from .forms import RegistrationForm
-from .models import UserProfile
+from .models import UserProfile, PasswordsProfile
+from .tasks import send_activation_email, send_reset_password_email
 from .utilities import is_base64
 
 PRIVATE_IPS_PREFIX = ('10.', '172.', '192.', '127.')
 redis_db = redis.from_url(settings.REDIS_URL, decode_responses=True)
+User = get_user_model()
 
 
 def get_client_ip(request):
@@ -108,9 +114,19 @@ def error_page(request, *args, type=None, **kwargs):
         return render(request, 'profiles/errors/mail_verify.html')
 
 
+def send_activation_mail(request):
+    send_activation_email.delay(request.scheme, request.get_host(), request.user.id)
+    messages.info(request, "Mail has been sent")
+    if not PasswordsProfile.objects.filter(user=request.user).exists():
+        profile = PasswordsProfile.objects.create(user=request.user)
+        profile.old_passwords.append(request.user.password)
+        profile.save()
+    return redirect(reverse("profiles:info"))
+
+
 def activate_user_view(request, *args, code=None, **kwargs):
     if code:
-        if not True:
+        if not is_base64(code):
             messages.error(request, "Your activation key is invalid.", extra_tags="danger")
             return redirect(reverse("profiles:login"))
         code = urlsafe_base64_decode(code).decode('utf-8')
@@ -131,3 +147,65 @@ def activate_user_view(request, *args, code=None, **kwargs):
         messages.error(request, "Your activation key is invalid.", extra_tags="danger")
         return redirect(reverse("profiles:login"))
     return redirect(reverse("profiles:info"))
+
+
+def reset_password(request, *args, **kwargs):
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data['email']
+            user = User.objects.filter(email=data)
+            if user.exists():
+                send_reset_password_email.delay(request.scheme, request.get_host(), user.first().id)
+            messages.success(request, "If this email is associated with an account, a mail will be sent with "
+                                      "instructions on how to reset your password.")
+            return redirect(reverse("profiles:login"))
+    else:
+        form = PasswordResetForm()
+    return render(request, "profiles/reset/reset.html", {"form": form})
+
+
+def password_reset_action(request, uidb64=None, token=None):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save(commit=False)
+                newpassword = form.cleaned_data['new_password1']
+                try:
+                    # Retrieve the PasswordsProfile instance for the user
+                    profile = PasswordsProfile.objects.get(user=user)
+                except PasswordsProfile.DoesNotExist:
+                    return False
+
+                    # Check if the entered password matches any of the previous passwords
+                if not isinstance(profile.old_passwords, list):
+                    profile.previous_passwords = []
+                for old_password in profile.old_passwords:
+                    if check_password(newpassword, old_password):
+                        exists = True
+                    else:
+                        exists = False
+                if exists:
+                    messages.error(request, "You cannot use a previously used password.", extra_tags="danger")
+                    return render(request, 'profiles/reset/confirm.html', {'form': form, 'validlink': True})
+                else:
+                    profile = PasswordsProfile.objects.get(user=user)
+                    profile.old_passwords.append(user.password)
+                    profile.save()
+                    form.save()
+                    messages.success(request, "Your password has been reset. Please login again.")
+                return redirect(reverse("profiles:login"))
+        else:
+            form = SetPasswordForm(user)
+        messages.success(request, "Your link is valid. Please set your new password.")
+        return render(request, 'profiles/reset/confirm.html', {'form': form, 'validlink': True})
+    else:
+        messages.error(request,"Invalid Reset link. Link may have expired", extra_tags="danger")
+        return render(request, 'profiles/reset/confirm.html', {'validlink': False})

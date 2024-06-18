@@ -1,9 +1,9 @@
-import base64
 import random
 import re
 import string
 
 from django.conf import settings
+from django.utils.http import urlsafe_base64_decode
 
 countries = [
     'afghanistan', 'albania', 'algeria', 'american samoa', 'andorra', 'angola',
@@ -90,7 +90,8 @@ def is_base64(s):
 
     try:
         # Try to decode the string and check if the result is a valid ASCII string
-        base64.b64decode(s, validate=True).decode('ascii')
+        urlsafe_base64_decode(s).decode('utf-8')
         return True
     except Exception:
         return False
+

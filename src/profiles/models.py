@@ -4,17 +4,15 @@ Jarvis AI Models
 
 import uuid
 
-from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, UserManager
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.db import models
 from django.db.models.functions import Now
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from .utilities import countries_exist, code_generator
+from .utilities import countries_exist
 
 
 def validate_country(name):
@@ -67,3 +65,24 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """Returns the person's full name."""
         return f"{self.first_name} {self.last_name}"
 
+    class Meta:
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
+        db_table = "user_profile"
+        ordering = ['-created']
+        unique_together = (("username", "email"),)
+
+
+class PasswordsProfile(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    old_passwords = models.JSONField(default=list)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name = "Password Profile"
+        verbose_name_plural = "Password Profiles"
+        get_latest_by = "updated"
+        ordering = ['-updated']

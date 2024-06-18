@@ -1,0 +1,38 @@
+{% extends 'profiles/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}
+Paul Studios | Password Reset
+{% endblock title %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <div class="card mt-5" style="background-color: rgba(0, 0, 0, 0);">
+        <div class="card-body text-center">
+            <img src="{% static 'logo.png' %}"
+                             class="img-fluid mb-3"
+                             alt="PaulStudios Logo"
+                             style="max-width: 150px;">
+            <div class="mx-auto d-flex justify-content-center" style="width: 200px;color: skyblue;">
+                <h1 class="fw-bold">Reset Password</h1>
+            </div>
+            <div style="background-color: rgba(0, 0, 0, 0.5);">
+                <div class="text-light fw-bold">
+                    {% if validlink %}
+                    <form method="post" >
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="Set a new password.">Submit</button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        The password reset link was invalid, possibly because it has already been used. Please request a new password reset.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
