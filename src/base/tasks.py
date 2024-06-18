@@ -19,6 +19,11 @@ redis_db = redis.from_url(settings.REDIS_URL, decode_responses=True)
 User = get_user_model()
 
 
+@app.task(bind=True)
+def delete_key(self, key):
+    redis_db.delete(key)
+
+
 def increase_progress(task_id):
     string = f"progress-{task_id}"
     redis_db.set(string, int(redis_db.get(string)) + 1)
@@ -28,10 +33,12 @@ def set_progress(progress, task_id):
     string = f"progress-{task_id}"
     redis_db.set(string, progress)
 
-def update_progress(name, task_id, img = "/static/image_loading.svg"):
+
+def update_progress(name, task_id, img="/static/image_loading.svg"):
     redis_db.set(f"current-{task_id}", name)
     redis_db.set(f"image-{task_id}", img)
     increase_progress(task_id)
+
 
 @shared_task
 def delete_local_file(filename):

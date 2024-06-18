@@ -4,6 +4,7 @@ from pathlib import Path
 
 import redis
 from celery.result import AsyncResult
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404
 from django.shortcuts import render, redirect
@@ -42,6 +43,12 @@ def index(request):
             redis_db.set(f"total-{t}", 1000)
             redis_db.set(f"image-{t}", "/static/logo.png")
             return redirect(reverse("songdownloader:progress", kwargs={"task_id": t}))
+        else:
+            for key, error in list(form.errors.items()):
+                if key == 'captcha' and error[0] == 'This field is required.':
+                    messages.error(request, "You must pass the reCAPTCHA test", extra_tags="danger")
+                    continue
+                messages.error(request, error)
     else:
         form = DataForm()
     return render(request, 'songdownloader/index.html', {'form': form})

@@ -3,6 +3,8 @@ from crispy_forms.layout import Layout, Row, Column, Submit
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 from profiles.models import UserProfile
 
@@ -23,6 +25,7 @@ class RegistrationForm(UserCreationForm):
         widget=forms.HiddenInput(),
         required=False,
     )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +47,7 @@ class RegistrationForm(UserCreationForm):
                 Column('password2', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
+            Row(Column('captcha', css_class='form-group col-md-4 mb-0 bg-transparent'), css_class='form-row'),
             Submit('submit', 'Register')
         )
     class Meta:

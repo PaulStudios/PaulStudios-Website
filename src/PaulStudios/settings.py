@@ -15,6 +15,7 @@ from pathlib import Path
 import environ
 from decouple import config
 import dj_database_url
+from django.core.management.commands.runserver import Command as runserver
 
 env = environ.Env()
 environ.Env.read_env()
@@ -25,8 +26,6 @@ MODE = "production"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-from django.core.management.commands.runserver import Command as runserver
 
 if "PORT" in os.environ:
     runserver.default_port = env("PORT")
@@ -55,6 +54,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',
+    'django_recaptcha',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -95,7 +95,6 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "sesame.backends.ModelBackend",
 ]
 
 WSGI_APPLICATION = 'PaulStudios.wsgi.application'
@@ -114,9 +113,6 @@ DATABASE_LIST = {
     },
     'prod': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
-
-if 'test' not in sys.argv:
-    DATABASE_LIST['web'] = {'ENGINE': 'django.db.backends.postgresql_psycopg2','NAME': env("DB_NAME"),'USER': env("DB_USER"),'PASSWORD': env("DB_PASSWORD"),'HOST': env("DB_HOST"),'PORT': env("DB_PORT")}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -203,13 +199,14 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_WORKER_SEND_TASK_EVENTS = True
 CELERY_TASK_SEND_SENT_EVENT = True
 
-SESAME_MAX_AGE = 30
-
 SONGDOWNLOADER_SPOTIFY_CLIENT_ID = env("SPOTIFY_CLIENT_ID")
 SONGDOWNLOADER_SPOTIFY_CLIENT_SECRET = env("SPOTIFY_CLIENT_SECRET")
 GCS_API_KEY = env("GCS_API_KEY")
 GCS_ENGINE_ID = env("GCS_ENGINE_ID")
 YT_API_KEY = env("YT_API_KEY")
+
+RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_SITE_KEY")
+RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_SECRET_KEY")
 
 if MODE == "development":
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -218,7 +215,8 @@ if MODE == "development":
     REDIS_URL = 'redis://localhost:6379/1'
     if "test" in sys.argv:
         DATABASES = {'default': DATABASE_LIST.get("test")}
-    else: DATABASES = {'default': DATABASE_LIST.get("dev")}
+    else:
+        DATABASES = {'default': DATABASE_LIST.get("dev")}
 elif MODE == "production":
     CELERY_BROKER_URL = 'redis://redis:6379/0'
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'

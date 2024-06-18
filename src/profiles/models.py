@@ -67,24 +67,3 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """Returns the person's full name."""
         return f"{self.first_name} {self.last_name}"
 
-    def send_activation_email(self, req):
-        if not self.activated:
-            self.activation_key = code_generator()   #generate key
-            self.save()
-            path_ = reverse('profiles:activate', kwargs={"code": self.activation_key})
-            full_path = "http://" + req.get_host() + path_
-            subject = '[PaulStudios] Activate Account'
-            from_email = settings.EMAIL_HOST_USER
-            message = f'''<a href='{full_path}'>Activate your account </a>'''
-            recipient_list = [self.email]
-            html_message = f"<p><a href='{full_path}'>Activate your account </a></p>"
-            print(html_message)
-            sent_mail = send_mail(
-                subject=subject,
-                message=message,
-                from_email=from_email,
-                recipient_list=recipient_list,
-                fail_silently=False,
-                html_message=html_message)
-            return sent_mail
-        return "FAILED"

@@ -19,7 +19,6 @@ class UserProfileModelTests(TestCase):
             username=FAKER.username(),
             email=FAKER.email(),
             password=FAKER.slug(),
-            is_admin=False,
             register_ip=FAKER.ipv4()
         )
 

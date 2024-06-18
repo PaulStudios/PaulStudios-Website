@@ -1,4 +1,6 @@
+import base64
 import random
+import re
 import string
 
 from django.conf import settings
@@ -77,3 +79,18 @@ SHORTCODE_MIN = getattr(settings, "SHORTCODE_MIN", 35)
 
 def code_generator(size=SHORTCODE_MIN, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
+
+def is_base64(s):
+    # Check if the string matches the Base64 format using a regex pattern
+    base64_pattern = re.compile(r'^[A-Za-z0-9+/]*={0,2}$')
+
+    if not base64_pattern.match(s):
+        return False
+
+    try:
+        # Try to decode the string and check if the result is a valid ASCII string
+        base64.b64decode(s, validate=True).decode('ascii')
+        return True
+    except Exception:
+        return False

@@ -20,7 +20,6 @@ class InfoViewTests(TestCase):
             username=FAKER.username(),
             email=FAKER.email(),
             password=FAKER.slug(),
-            is_admin=False,
             activated=True,
             register_ip=FAKER.ipv4()
         )
@@ -61,7 +60,6 @@ class LoginViewTests(TestCase):
             username=FAKER.username(),
             email=FAKER.email(),
             password=FAKER.slug(),
-            is_admin=False,
             register_ip=FAKER.ipv4()
         )
 
@@ -91,7 +89,6 @@ class IndexViewTests(TestCase):
             username="i_am_a_slug",
             email=FAKER.email(),
             password=FAKER.slug(),
-            is_admin=False,
             register_ip=FAKER.ipv4()
         )
 

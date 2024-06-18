@@ -17,7 +17,9 @@ Django==5.0.6
 django-crispy-forms==2.1
 django-environ==0.11.2
 django-extensions==3.2.3
+django-recaptcha==4.0.0
 django-sesame==3.2.2
+fake.py==0.6.9
 flower==2.0.1
 google-api-core==2.19.0
 google-api-python-client==2.131.0

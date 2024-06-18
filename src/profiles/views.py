@@ -1,14 +1,19 @@
+import redis
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.http import urlsafe_base64_decode
 
 from PaulStudios import settings
 from .forms import RegistrationForm
 from .models import UserProfile
+from .utilities import is_base64
 
 PRIVATE_IPS_PREFIX = ('10.', '172.', '192.', '127.')
+redis_db = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 
 def get_client_ip(request):
@@ -40,7 +45,7 @@ def user_check(request):
         messages.error(request, 'You are not logged in.', extra_tags="danger")
         return redirect(f"{settings.LOGIN_URL}?next={request.path}")
     if not user.activated:
-        messages.error(request, 'You are not activated. Please verify your mail first!.', extra_tags="danger")
+        messages.error(request, 'Your account is not activated. Please verify your mail first!', extra_tags="danger")
         return redirect(reverse("profiles:error_page", kwargs={'type': "mail_verify"}))
     return
 
@@ -86,6 +91,12 @@ def Register(request):
             else:
                 # Handle password mismatch error here
                 form.add_error('password2', 'Passwords entered do not match')
+        else:
+            for key, error in list(form.errors.items()):
+                if key == 'captcha' and error[0] == 'This field is required.':
+                    messages.error(request, "You must pass the reCAPTCHA test", extra_tags="danger")
+                    continue
+                messages.error(request, error)
     else:
         form = RegistrationForm()
     return render(request, 'profiles/register.html', {'form': form})
@@ -99,13 +110,24 @@ def error_page(request, *args, type=None, **kwargs):
 
 def activate_user_view(request, *args, code=None, **kwargs):
     if code:
+        if not True:
+            messages.error(request, "Your activation key is invalid.", extra_tags="danger")
+            return redirect(reverse("profiles:login"))
+        code = urlsafe_base64_decode(code).decode('utf-8')
         qs = UserProfile.objects.filter(activation_key=code)
         if qs.exists() and qs.count() == 1:
             profile = qs.first()
+            if not redis_db.exists(profile.activation_key):
+                messages.error(request, 'Your activation key has expired.', extra_tags="danger")
+                return redirect(reverse("profiles:login"))
             if not profile.activated:
                 profile.activated = True
                 profile.activation_key = "DONE"
                 profile.save()
-                messages.success(request, "Profile activated. You now have complete access to all Apps.")
+                messages.success(request, "Profile activated. You now have complete access to all Apps & Services.")
                 return redirect(reverse("profiles:login"))
-    return redirect(reverse("profiles:login"))
+            messages.success(request, "Profile already activated.")
+            return redirect(reverse("profiles:info"))
+        messages.error(request, "Your activation key is invalid.", extra_tags="danger")
+        return redirect(reverse("profiles:login"))
+    return redirect(reverse("profiles:info"))

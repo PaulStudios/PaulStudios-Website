@@ -29,7 +29,7 @@ services:
         - web
 
   web:
-    image: hilfing/paulstudios-website:0.6.0-beta
+    image: hilfing/paulstudios-website
     command: gunicorn --config gunicorn.conf.py --statsd-host=statsd-exporter:9125 --statsd-prefix=paulstudios.web PaulStudios.wsgi:application
     volumes:
       - .:/home/app/webapp
@@ -46,7 +46,7 @@ services:
       - STATSD_PORT="9125"
 
   worker:
-    image: hilfing/paulstudios-website:0.6.0-beta
+    image: hilfing/paulstudios-website
     command: celery -A PaulStudios worker --loglevel=info -c 3
     restart: unless-stopped
     volumes:

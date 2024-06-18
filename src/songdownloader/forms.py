@@ -1,5 +1,7 @@
 from django import forms
 from django.forms import Form
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 
 class BaseForm(Form):
@@ -21,6 +23,8 @@ class DataForm(BaseForm):
         ('Playlist', 'Playlist')), required=True
     )
     url = forms.URLField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
     required_css_class = 'required'
 

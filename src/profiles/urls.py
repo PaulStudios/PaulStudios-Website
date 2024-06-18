@@ -10,9 +10,9 @@ urlpatterns = [
     path('activate/<str:code>/', views.activate_user_view, name='activate'),
     path('login/', LoginView.as_view(
         template_name='profiles/login.html',
-        redirect_authenticated_user=True), name ='login'
+        redirect_authenticated_user=True), name='login'
          ),
     path('error/<str:type>', views.error_page, name="error_page"),
-    path('logout/', views.user_logout, name ='logout'),
-    path('register/', views.Register, name ='register'),
+    path('logout/', views.user_logout, name='logout'),
+    path('register/', views.Register, name='register'),
 ]
