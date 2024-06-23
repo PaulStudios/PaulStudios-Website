@@ -42,7 +42,7 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://a0d6-103-76-82-163.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS = ["https://glowworm-known-raven.ngrok-free.app"]
 
 # Application definitions
 
@@ -175,6 +175,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
 if not 'test' in sys.argv:
     EMAIL_HOST = env("EMAIL_HOST")
     EMAIL_PORT = env("EMAIL_PORT")
@@ -208,11 +211,29 @@ YT_API_KEY = env("YT_API_KEY")
 RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_SITE_KEY")
 RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_SECRET_KEY")
 
+CACHE_List = {
+    'dev': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    },
+    'prod': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 if MODE == "development":
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media_development')
     REDIS_URL = 'redis://localhost:6379/1'
+    CACHES = {'default': CACHE_List.get("dev")}
     if "test" in sys.argv:
         DATABASES = {'default': DATABASE_LIST.get("test")}
     else:
@@ -222,6 +243,7 @@ elif MODE == "production":
     CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     REDIS_URL = 'redis://redis:6379/1'
+    CACHES = {'default': CACHE_List.get("prod")}
     DATABASES = {'default': DATABASE_LIST.get("prod")}
     DEBUG = False
 else:

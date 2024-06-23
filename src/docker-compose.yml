@@ -28,6 +28,15 @@ services:
       depends_on:
         - web
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    environment:
+      - NGROK_AUTHTOKEN=2galn8gZQzta2tjAwYBNbJzahpU_6RUoBTDMQe6xUeFENKxVz
+    command: http --domain=glowworm-known-raven.ngrok-free.app 80 --log=stdout
+    network_mode: host
+    stdin_open: true
+    tty: true
+
   web:
     image: hilfing/paulstudios-website
     command: gunicorn --config gunicorn.conf.py --statsd-host=statsd-exporter:9125 --statsd-prefix=paulstudios.web PaulStudios.wsgi:application

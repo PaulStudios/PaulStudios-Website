@@ -1,10 +1,11 @@
+import string
+
 import redis
 from celery.utils.log import get_task_logger
-
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.cache import cache
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes
@@ -14,7 +15,6 @@ from django.utils.http import urlsafe_base64_encode
 from PaulStudios import settings
 from PaulStudios.celery import app
 from base.tasks import delete_key
-from .models import PasswordsProfile
 from .utilities import code_generator
 
 logger = get_task_logger(__name__)
@@ -66,5 +66,23 @@ def send_reset_password_email(self, request_scheme, host, user_id):
     email.attach_alternative(html_content, "text/html")
     email.send()
     logger.info("Sent reset password email to {} for user {}".format(to_email, user.username))
+
+
+@app.task(bind=True)
+def send_login_email(self, user_id):
+    user = USER.objects.get(pk=user_id)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    otp = code_generator(6, string.digits)
+    cache.set(f'verification_code_{uid}', otp, timeout=600)
+    subject = '[PaulStudios] OTP Verification'
+    from_email = settings.EMAIL_HOST_USER
+    html_content = render_to_string('profiles/mails/otp_mail.html',
+                                    {'user': user, 'otp_code': otp})
+    text_content = strip_tags(html_content)
+    to_email = user.email
+    email = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+    logger.info("Sent email with login otp to {} for user {}".format(to_email, user.username))
 
 

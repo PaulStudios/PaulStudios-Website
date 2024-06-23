@@ -1,10 +1,13 @@
 import redis
 from django.contrib import messages
-from django.contrib.auth import logout, get_user_model
+from django.contrib.auth import logout, get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.hashers import check_password
-from django.shortcuts import redirect, render
+from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
@@ -12,10 +15,10 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 
 from PaulStudios import settings
-from .forms import RegistrationForm
-from .models import UserProfile, PasswordsProfile
-from .tasks import send_activation_email, send_reset_password_email
-from .utilities import is_base64
+from .forms import RegistrationForm, OTPLoginForm, EnterOTPForm
+from .models import PasswordsProfile
+from .tasks import send_activation_email, send_reset_password_email, send_login_email
+from .utilities import is_base64, validateEmail
 
 PRIVATE_IPS_PREFIX = ('10.', '172.', '192.', '127.')
 redis_db = redis.from_url(settings.REDIS_URL, decode_responses=True)
@@ -58,10 +61,6 @@ def user_check(request):
 
 def index(request):
     return render(request, 'profiles/index.html', {})
-
-
-def custom_404(request, exception):
-    return render(request, 'profiles/404.html', status=404)
 
 
 @login_required
@@ -115,7 +114,7 @@ def error_page(request, *args, type=None, **kwargs):
 
 
 def send_activation_mail(request):
-    send_activation_email.delay(request.scheme, request.get_host(), request.user.id)
+    send_activation_email.apply_async(request.scheme, request.get_host(), request.user.id)
     messages.info(request, "Mail has been sent")
     if not PasswordsProfile.objects.filter(user=request.user).exists():
         profile = PasswordsProfile.objects.create(user=request.user)
@@ -130,7 +129,7 @@ def activate_user_view(request, *args, code=None, **kwargs):
             messages.error(request, "Your activation key is invalid.", extra_tags="danger")
             return redirect(reverse("profiles:login"))
         code = urlsafe_base64_decode(code).decode('utf-8')
-        qs = UserProfile.objects.filter(activation_key=code)
+        qs = User.objects.filter(activation_key=code)
         if qs.exists() and qs.count() == 1:
             profile = qs.first()
             if not redis_db.exists(profile.activation_key):
@@ -156,7 +155,7 @@ def reset_password(request, *args, **kwargs):
             data = form.cleaned_data['email']
             user = User.objects.filter(email=data)
             if user.exists():
-                send_reset_password_email.delay(request.scheme, request.get_host(), user.first().id)
+                send_reset_password_email.apply_async(request.scheme, request.get_host(), user.first().id)
             messages.success(request, "If this email is associated with an account, a mail will be sent with "
                                       "instructions on how to reset your password.")
             return redirect(reverse("profiles:login"))
@@ -168,7 +167,7 @@ def reset_password(request, *args, **kwargs):
 def password_reset_action(request, uidb64=None, token=None):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
+        user = get_object_or_404(User, pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
@@ -207,5 +206,54 @@ def password_reset_action(request, uidb64=None, token=None):
         messages.success(request, "Your link is valid. Please set your new password.")
         return render(request, 'profiles/reset/confirm.html', {'form': form, 'validlink': True})
     else:
-        messages.error(request,"Invalid Reset link. Link may have expired", extra_tags="danger")
+        messages.error(request, "Invalid Reset link. Link may have expired", extra_tags="danger")
         return render(request, 'profiles/reset/confirm.html', {'validlink': False})
+
+
+def login_otp(request, page_type=None, code=None):
+    if page_type == "1" and code == "step1":
+        if request.method == "POST":
+            form = OTPLoginForm(request.POST)
+            if form.is_valid():
+                user_info = form.cleaned_data['input_data']
+                if validateEmail(user_info):
+                    user = User.objects.filter(email=user_info)
+                    user = user.first()
+                else:
+                    user = User.objects.filter(username=user_info)
+                    user = user.first()
+                if user is None:
+                    messages.error(request, "The account information entered is invalid.", extra_tags="danger")
+                    return render(request, 'profiles/login.html', {'form': form, 'mode': "otp"})
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                send_login_email.apply_async(user.pk)
+                messages.success(request, "Your OTP has been sent to your registered email id.")
+                return redirect(reverse("profiles:login_otp", kwargs={"page_type": "2", "code": uid}))
+        else:
+            form = OTPLoginForm()
+            return render(request, 'profiles/login.html', {'form': form, 'mode': "otp"})
+    elif page_type == "2" and code is not None:
+        if request.method == "POST":
+            form = EnterOTPForm(request.POST)
+            uid = force_str(urlsafe_base64_decode(code))
+            user = get_object_or_404(User, pk=uid)
+            if form.is_valid():
+                input_otp = form.cleaned_data['input_data']
+                otp = cache.get(f'verification_code_{code}')
+                if otp is None:
+                    messages.error(request, "OTP has expired.", extra_tags="danger")
+                    return redirect(reverse("profiles:login_otp", kwargs={"page_type": "1", "code": "step1"}))
+                if input_otp == otp:
+                    cache.delete(f'verification_code_{code}')
+                    login(request, user)
+                    messages.success(request, "You have been successfully logged in")
+                    return redirect(reverse("profiles:info"))
+                else:
+                    messages.error(request, "Invalid OTP.", extra_tags="danger")
+                    return redirect(reverse("profiles:login_otp", kwargs={"page_type": "1", "code": "step1"}))
+        else:
+            form = EnterOTPForm()
+            return render(request, 'profiles/login.html', {'form': form, 'mode': "otp"})
+    else:
+        raise PermissionDenied("You do not have permission to perform this action.")
+

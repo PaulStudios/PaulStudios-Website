@@ -1,6 +1,7 @@
 import redis
 from celery.result import AsyncResult
 from django.http import JsonResponse
+from django.shortcuts import render
 
 from PaulStudios import settings
 
@@ -23,3 +24,15 @@ def task_progress(request, task_id):
     except Exception as e:
         print(e)
         return JsonResponse({'error': str(e)})
+
+
+def custom_403(request, exception):
+    return render(request, 'base/403.html', status=403)
+
+
+def custom_404(request, exception):
+    return render(request, 'base/404.html', status=404)
+
+
+def custom_500(request):
+    return render(request, 'base/500.html', status=500)

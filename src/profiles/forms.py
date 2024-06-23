@@ -50,8 +50,24 @@ class RegistrationForm(UserCreationForm):
             Row(Column('captcha', css_class='form-group col-md-4 mb-0 bg-transparent'), css_class='form-row'),
             Submit('submit', 'Register')
         )
+
     class Meta:
         model = user
         fields = ["first_name", "last_name",
                   "username",
-                  "email", "country",]
+                  "email", "country", ]
+
+
+class OTPLoginForm(forms.Form):
+    input_data = forms.CharField(label="Username/ Email")
+
+
+class EnterOTPForm(forms.Form):
+    code = forms.CharField(
+        max_length=6,
+        label='Enter your verification code',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '6-digit code'
+        })
+    )

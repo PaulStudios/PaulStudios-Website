@@ -15,15 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.core.exceptions import PermissionDenied
 from django.urls import path, include
 from django.views.generic.base import TemplateView, RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls import handler500, handler403, handler404
 
     
-handler404 = "profiles.views.custom_404"
+handler404 = "base.views.custom_404"
+handler403 = "base.views.custom_403"
+handler500 = "base.views.custom_500"
+
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='profiles/index.html'),
@@ -35,7 +40,6 @@ urlpatterns = [
     path('song-downloader/', include("songdownloader.urls")),
     path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon/favicon.ico'))),
 ]
-
 
   
 if settings.DEBUG:

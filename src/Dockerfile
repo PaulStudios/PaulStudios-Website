@@ -1,25 +1,60 @@
-# base image  
-FROM python:3.12-alpine  
-# setup environment variable  
-ENV DockerHOME=/home/app/webapp  
-# set work directory  
-RUN mkdir -p $DockerHOME  
+# Use a multi-stage build to minimize the final image size
+# Stage 1: Build stage
+FROM python:3.12-alpine AS build
 
-# where your code lives  
-WORKDIR $DockerHOME  
+# Setup environment variable
+ENV DockerHOME=/home/app/webapp
 
-# set environment variables  
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1  
+# Set environment variables to avoid writing .pyc files and enable buffer
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1  
 
-# install dependencies  
-RUN pip install --upgrade pip  
+# Install build dependencies
+RUN apk update && apk add --no-cache --virtual .build-deps \
+    gcc \
+    musl-dev \
+    libffi-dev \
+    postgresql-dev \
+    cargo \
+    && pip install --upgrade pip \
+    && pip install \
+    celery \
+    flower \
+    django \
+    django-environ \
+    python-decouple \
+    dj_database_url \
+    django-crispy-forms \
+    crispy-bootstrap5 \
+    django_extensions \
+    psycopg2-binary \
+    ChatbotAPI \
+    whitenoise \
+    redis[hiredis] \
+    django-redis \
+    gunicorn \
+    pytube \
+    lyrics_extractor \
+    youtube_search \
+    pillow \
+    django-sesame \
+    google-api-python-client \
+    pandas \
+    django-recaptcha \
+    && apk del .build-deps
 
-# run this command to install all dependencies  
-RUN pip install celery flower django django-environ python-decouple dj_database_url django-crispy-forms crispy-bootstrap5 django_extensions psycopg2-binary ChatbotAPI whitenoise redis[hiredis] gunicorn pytube lyrics_extractor youtube_search pillow django-sesame google-api-python-client pandas django-recaptcha
+# Stage 2: Production stage
+FROM python:3.12-alpine
 
-# copy whole project to your docker home directory. 
-COPY . $DockerHOME  
+# Setup environment variable
+ENV DockerHOME=/home/app/webapp
 
+# Set work directory
+WORKDIR $DockerHOME
 
+# Copy dependencies from build stage
+COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build /usr/local/bin /usr/local/bin
 
+# Copy the whole project to your docker home directory
+COPY . $DockerHOME

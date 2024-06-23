@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}">
+    <title>PaulStudios | 500 | Internal Server Error</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #1d1f21; /* Dark background */
+            color: #c5c8c6; /* Light text */
+            font-family: 'Bevan', cursive;
+            overflow: hidden;
+        }
+        .error-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .error-heading {
+            font-size: 130px;
+            letter-spacing: 5px;
+            background-color: black;
+            color: transparent;
+            text-shadow: 2px 2px 3px rgba(255, 255, 255, 0.1);
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            margin: 10vh 0 0;
+        }
+        .error-heading span {
+            font-size: 1.2em;
+        }
+        .error-code {
+            font-size: 16px;
+            margin: 0 30px 25px;
+            color: #bdbdbd; /* Light grey */
+        }
+        .error-code span {
+            color: #f0c674; /* Yellow */
+        }
+        .error-code em {
+            color: #b294bb; /* Purple */
+            font-style: unset;
+        }
+        .error-code b {
+            color: #81a2be; /* Blue */
+            font-weight: 500;
+        }
+        a {
+            color: #81a2be; /* Blue */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 20px;
+            text-decoration: underline;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        a:hover {
+            color: #b5bd68; /* Light green on hover */
+            text-decoration: none;
+        }
+        @media screen and (max-width: 880px) {
+            .error-heading {
+                font-size: 14vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid error-container">
+        <h1 class="error-heading">HTTP: <span>500</span></h1>
+        <code class="error-code"><span>server</span>.<em>internal_error</em> = true;</code>
+        <code class="error-code"><span>if</span> (<b>server_down</b>) {<span>try_refresh()</span>;}</code>
+        <code class="error-code"><span>else if (<b>database_error</b>)</span> {<em>alert</em>(<i>"Sorry, something went wrong on our end."</i>); <span>window</span>.<em>location</em> = home;}</code>
+        <center><a href="{% url 'profiles:info' %}">HOME</a></center>
+    </div>
+
+    <script>
+        function type(n, t) {
+            var str = document.getElementsByClassName("error-code")[n].innerHTML.toString();
+            var i = 0;
+            document.getElementsByClassName("error-code")[n].innerHTML = "";
+
+            setTimeout(function () {
+                var se = setInterval(function () {
+                    i++;
+                    document.getElementsByClassName("error-code")[n].innerHTML =
+                    str.slice(0, i) + "|";
+                    if (i == str.length) {
+                        clearInterval(se);
+                        document.getElementsByClassName("error-code")[n].innerHTML = str;
+                    }
+                }, 10);
+            }, t);
+        }
+
+        type(0, 0);
+        type(1, 600);
+        type(2, 1300);
+    </script>
+
+</body>
+</html>

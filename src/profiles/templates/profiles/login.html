@@ -22,14 +22,50 @@ Paul Studios | Login
                     {% csrf_token %}
                     {{ form|crispy }}
                     <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="right" title="Log in to PaulStudios">Sign in</button>
+                    {% if mode != 'otp' %}
+                    <h6><a href="{%url 'profiles:reset_password'%}" class="text-light">Forgot Password? </a></h6>
+                    {% endif %}
                 </form>
                 </div>
                 <h6 class="text-warning">
                     Need An Account? <a href="{%url 'profiles:register'%}" class="card-link">Sign Up</a>
                 </h6>
+                {% if mode != 'otp' %}
+                    <hr>
+                    <hr>
+                    <h2>OR</h2>
+                    <hr>
+                    <hr>
+                    <div class="text-danger fw-bold">
+                        <button class="btn btn-success" data-bs-toggle="tooltip"
+                                data-bs-placement="right" title="Login using OTP received by email."
+                                onclick="myfunc()">
+                       Login using OTP
+                    </button></div>
+                {% else %}
+                    <hr>
+                    <hr>
+                    <h2>OR</h2>
+                    <hr>
+                    <hr>
+                    <div class="text-danger fw-bold">
+                        <button class="btn btn-success" data-bs-toggle="tooltip"
+                                data-bs-placement="right" title="Login using Password."
+                                onclick="myfunc2()">
+                       Login using Password
+                    </button></div>
+                {% endif %}
             </div>
         </div>
       </div>
     </div>
   </div>
+<script>
+    function myfunc(){
+        location.replace("{%url 'profiles:login_otp' page_type='1' code='step1' %}")
+    }
+    function myfunc2(){
+        location.replace("{%url 'profiles:login' %}")
+    }
+</script>
 {% endblock %}

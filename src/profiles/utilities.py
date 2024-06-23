@@ -4,6 +4,8 @@ import string
 
 from django.conf import settings
 from django.utils.http import urlsafe_base64_decode
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 countries = [
     'afghanistan', 'albania', 'algeria', 'american samoa', 'andorra', 'angola',
@@ -69,6 +71,14 @@ def countries_exist(val: str):
     return False
 
 
+def validateEmail(email):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
+
+
 def fake_country() -> str:
     """Returns a random country"""
     return random.choice(countries)
@@ -90,8 +100,7 @@ def is_base64(s):
 
     try:
         # Try to decode the string and check if the result is a valid ASCII string
-        urlsafe_base64_decode(s).decode('utf-8')
+        urlsafe_base64_decode(s)
         return True
     except Exception:
         return False
-
