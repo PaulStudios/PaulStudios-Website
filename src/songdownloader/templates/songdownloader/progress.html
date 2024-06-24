@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     throw new Error('Invalid Task ID');
                 }
                 if (parseInt(data.progress) > parseInt(data.total)) {
-                    throw new Error('Invalid data structure');
+                    throw new Error('Invalid data structure. Please refresh the page.');
                 }
                 let progress = parseInt(data.progress);
                 let total = parseInt(data.total);

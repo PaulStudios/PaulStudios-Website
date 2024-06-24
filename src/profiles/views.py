@@ -114,7 +114,7 @@ def error_page(request, *args, type=None, **kwargs):
 
 
 def send_activation_mail(request):
-    send_activation_email.apply_async(request.scheme, request.get_host(), request.user.id)
+    send_activation_email.delay(request.scheme, request.get_host(), request.user.id)
     messages.info(request, "Mail has been sent")
     if not PasswordsProfile.objects.filter(user=request.user).exists():
         profile = PasswordsProfile.objects.create(user=request.user)
@@ -155,7 +155,7 @@ def reset_password(request, *args, **kwargs):
             data = form.cleaned_data['email']
             user = User.objects.filter(email=data)
             if user.exists():
-                send_reset_password_email.apply_async(request.scheme, request.get_host(), user.first().id)
+                send_reset_password_email.delay(request.scheme, request.get_host(), user.first().id)
             messages.success(request, "If this email is associated with an account, a mail will be sent with "
                                       "instructions on how to reset your password.")
             return redirect(reverse("profiles:login"))
@@ -226,7 +226,7 @@ def login_otp(request, page_type=None, code=None):
                     messages.error(request, "The account information entered is invalid.", extra_tags="danger")
                     return render(request, 'profiles/login.html', {'form': form, 'mode': "otp"})
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
-                send_login_email.apply_async(user.pk)
+                send_login_email.delay(user.pk)
                 messages.success(request, "Your OTP has been sent to your registered email id.")
                 return redirect(reverse("profiles:login_otp", kwargs={"page_type": "2", "code": uid}))
         else:
@@ -238,7 +238,7 @@ def login_otp(request, page_type=None, code=None):
             uid = force_str(urlsafe_base64_decode(code))
             user = get_object_or_404(User, pk=uid)
             if form.is_valid():
-                input_otp = form.cleaned_data['input_data']
+                input_otp = form.cleaned_data['code']
                 otp = cache.get(f'verification_code_{code}')
                 if otp is None:
                     messages.error(request, "OTP has expired.", extra_tags="danger")
