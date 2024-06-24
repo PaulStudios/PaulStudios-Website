@@ -9,10 +9,7 @@ urlpatterns = [
     path("info/", views.detail, name="info"),
     path('send-activation-mail', views.send_activation_mail, name="send-activation-mail"),
     path('activate/<str:code>/', views.activate_user_view, name='activate'),
-    path('login/', LoginView.as_view(
-        template_name='profiles/login.html',
-        redirect_authenticated_user=True), name='login'
-         ),
+    path('login/', LoginView.as_view(template_name='profiles/login.html', redirect_authenticated_user=True), name='login'),
     path('login_otp/<str:page_type>/<str:code>/', views.login_otp, name='login_otp'),
     path('error/<str:type>', views.error_page, name="error_page"),
     path('logout/', views.user_logout, name='logout'),

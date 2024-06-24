@@ -181,8 +181,9 @@ def password_reset_action(request, uidb64=None, token=None):
                     # Retrieve the PasswordsProfile instance for the user
                     profile = PasswordsProfile.objects.get(user=user)
                 except PasswordsProfile.DoesNotExist:
-                    return False
-
+                    profile = PasswordsProfile.objects.create(user=user)
+                    profile.old_passwords.append(user.password)
+                    profile.save()
                     # Check if the entered password matches any of the previous passwords
                 if not isinstance(profile.old_passwords, list):
                     profile.previous_passwords = []

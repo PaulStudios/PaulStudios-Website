@@ -1,9 +1,9 @@
 services:
   db:
     image: postgres:16.3-alpine
-    restart: unless-stopped
+    restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=main
       - POSTGRES_USER=web
@@ -11,14 +11,14 @@ services:
 
   redis:
     image: redis:7.2.5-alpine
-    restart: unless-stopped
+    restart: always
     command: ["redis-server", "--appendonly", "no", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
       - redis_data:/data
 
   nginx:
       image: nginx:alpine
-      restart: unless-stopped
+      restart: always
       ports:
         - "80:80"
       volumes:
@@ -40,8 +40,6 @@ services:
   web:
     image: hilfing/paulstudios-website
     command: gunicorn --config gunicorn.conf.py --statsd-host=statsd-exporter:9125 --statsd-prefix=paulstudios.web PaulStudios.wsgi:application
-    volumes:
-      - .:/home/app/webapp
     expose:
       - "8000"
     env_file:
@@ -57,12 +55,10 @@ services:
   worker:
     image: hilfing/paulstudios-website
     command: celery -A PaulStudios worker --loglevel=info -c 3
-    restart: unless-stopped
-    volumes:
-      - .:/home/app/webapp
+    restart: always
+    scale: 5
     env_file:
       - ./PaulStudios/.env
-    scale: 5
     depends_on:
       - db
       - redis
@@ -82,16 +78,14 @@ services:
   # Prometheus
   prometheus:
     image: prom/prometheus
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    expose:
-      - "9090:9090"
 
   # Grafana
   grafana:
     image: grafana/grafana
-    restart: unless-stopped
+    restart: always
     ports:
       - "3000:3000"
     depends_on:
@@ -104,7 +98,7 @@ services:
   # PostgreSQL Exporter
   postgres-exporter:
     image: wrouesnel/postgres_exporter
-    restart: unless-stopped
+    restart: always
     environment:
       DATA_SOURCE_NAME: "postgresql://web:authcode@db:5432/main?sslmode=disable"
     depends_on:
@@ -113,7 +107,7 @@ services:
   # Redis Exporter
   redis-exporter:
     image: oliver006/redis_exporter
-    restart: unless-stopped
+    restart: always
     command:
       - "--redis.addr=redis:6379"
     depends_on:
@@ -121,7 +115,7 @@ services:
 
   statsd-exporter:
     image: prom/statsd-exporter:v0.22.4
-    restart: unless-stopped
+    restart: always
     volumes:
       - "./statsd:/statsd" # mapping file
     command:
@@ -134,20 +128,18 @@ services:
     command:
       - '--path.rootfs=/host'
     pid: host
-    restart: unless-stopped
+    restart: always
     volumes:
       - '/:/host:ro,rslave'
 
   celery-exporter:
     image: danihodovic/celery-exporter
-    restart: unless-stopped
+    restart: always
     command: --broker-url=redis://redis
-    depends_on:
-      - redis
 
 
 volumes:
-  postgres_data:
+  db_data:
   grafana_data: 
   redis_data:
   flower_data:
