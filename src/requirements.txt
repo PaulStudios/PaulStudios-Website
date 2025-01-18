@@ -13,7 +13,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 crispy-bootstrap5==2024.2
 dj-database-url==2.2.0
-Django==5.0.6
+Django==5.0.11
 django-crispy-forms==2.1
 django-environ==0.11.2
 django-extensions==3.2.3
@@ -62,7 +62,7 @@ six==1.16.0
 soupsieve==2.5
 sqlparse==0.5.0
 textblob==0.18.0.post0
-tornado==6.4.1
+tornado==6.4.2
 tqdm==4.66.4
 typing_extensions==4.12.1
 tzdata==2024.1
