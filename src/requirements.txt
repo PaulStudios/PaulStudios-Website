@@ -35,7 +35,7 @@ joblib==1.4.2
 kombu==5.3.7
 lxml==5.2.2
 lyrics-extractor==3.0.1
-nltk==3.8.1
+nltk==3.9
 numpy==1.26.4
 packaging==24.0
 pandas==2.2.2
